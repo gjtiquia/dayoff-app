@@ -63,14 +63,5 @@ pnpm run start
 
 ## TODO
 
-- [x] auth with better-auth (email + password first for now)
-- [x] study if its easy to add OAuth in the future and auto merge with email/password
-    - pretty straightforward: https://www.better-auth.com/docs/concepts/users-accounts#account-linking
-- [x] sign up / sign in flow
-- [x] only allow adding items if signed in (C in CRUD)
-- [ ] database schema setup for adding items
-- [ ] allow reading items if not signed in (R in CRUD) (just read most recent with pagination first)
-- [ ] only allow updating and deleting items that i have uploaded (U in CRUD)
-- [ ] search queries - by name
-- [ ] show lowest, highest, average price
-- [ ] price history graph
+- [ ] put schedule in postgres schema
+- [ ] request leave, should read from schedule, and the range automatically converts into the hours, with the lunch hours too
