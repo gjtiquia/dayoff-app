@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, useWatch, useFieldArray } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -12,58 +12,32 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion"
 import { useToast } from "@/components/ui/use-toast"
-import { MUTATIONS } from "@/lib/tanstack"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { MUTATIONS } from "@/lib/tanstack/"
 
 import { addItemFormSchema } from "../../../backend/src/api/item/add"
 
 export function AddItemForm() {
     const { toast } = useToast()
+    const addItemMutation = MUTATIONS.ITEM.useAddItem()
 
     const form = useForm<z.infer<typeof addItemFormSchema>>({
         resolver: zodResolver(addItemFormSchema),
         defaultValues: {
-            // === Basic ===
-            itemName: "",
-            price: 0,
-            priceUnit: "each",
-            origin: "",
-
-            // === Advanced ===
-            packCount: 0,
-            totalWeightOrVolume: 0,
-            aliases: [],
-            discountReason: "",
+            startDate: "",
+            endDate: "",
+            description: "",
         },
     })
-
-    // Add useFieldArray hook for aliases
-    const fieldArray = useFieldArray<z.infer<typeof addItemFormSchema>>({
-        control: form.control,
-        // @ts-expect-error -- // TODO: Fix type error properly
-        name: "aliases"
-    })
-
-    // Subscribe to the value of "priceUnit", rerender if changes (cuz we do conditional rendering with this)
-    const priceUnit = useWatch({ control: form.control, name: "priceUnit" })
-
-    const addItemMutation = MUTATIONS.ITEM.useAddItem()
 
     function onSubmit(values: z.infer<typeof addItemFormSchema>) {
         addItemMutation.mutate(values, {
             onSuccess: (data) => {
                 form.reset()
                 toast({
-                    title: "Item Added Successfully",
-                    description: data.message,
+                    title: "Date Range Submitted Successfully",
+                    description: `Selected dates: ${values.startDate} to ${values.endDate}`,
                     variant: "default"
                 })
             },
@@ -71,53 +45,36 @@ export function AddItemForm() {
                 toast({
                     variant: "destructive",
                     title: "Error",
-                    description: "Failed to add item. Please try again.",
+                    description: error.message || "Failed to submit date range. Please try again.",
                 })
-                console.error("Failed to add item:", error)
+                console.error("Failed to submit:", error)
             }
         })
-    }
-
-    // Function to handle adding new alias
-    const handleAddAlias = () => {
-        // @ts-expect-error -- TODO: Fix type error properly
-        fieldArray.append("")
     }
 
     return (
         <Card className="max-w-2xl">
             <CardHeader>
-                <CardTitle className="text-lg md:text-xl">Add New Item</CardTitle>
+                <CardTitle className="text-lg md:text-xl">Select Date Range</CardTitle>
                 <CardDescription className="text-xs md:text-sm">
-                    Fill in the details below to add a new item to the inventory
+                    Choose your date range and add a description
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="itemName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Item Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="eg. Apples" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
-                                name="price"
+                                name="startDate"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Price ($)</FormLabel>
+                                        <FormLabel>Start Date</FormLabel>
                                         <FormControl>
-                                            <Input type="number" {...field} />
+                                            <Input
+                                                type="date"
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -126,27 +83,16 @@ export function AddItemForm() {
 
                             <FormField
                                 control={form.control}
-                                name="priceUnit"
+                                name="endDate"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Unit</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select a unit" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="each">each</SelectItem>
-                                                <SelectItem value="per pack">per pack</SelectItem>
-                                                <SelectItem value="per kg">per kg</SelectItem>
-                                                <SelectItem value="per lb">per lb</SelectItem>
-                                                <SelectItem value="per g">per g</SelectItem>
-                                                <SelectItem value="per oz">per oz</SelectItem>
-                                                <SelectItem value="per mL">per mL</SelectItem>
-                                                <SelectItem value="per L">per L</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <FormLabel>End Date</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="date"
+                                                {...field}
+                                            />
+                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -155,147 +101,31 @@ export function AddItemForm() {
 
                         <FormField
                             control={form.control}
-                            name="origin"
+                            name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Origin</FormLabel>
+                                    <FormLabel>Description</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="eg. Costco" {...field} />
+                                        <textarea
+                                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            placeholder="Enter a description for this date range..."
+                                            {...field}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
 
-                        <Accordion type="single" collapsible>
-                            <AccordionItem value="item-1">
-                                <AccordionTrigger>Advanced</AccordionTrigger>
-                                <AccordionContent className="space-y-4">
-                                    {
-                                        priceUnit === "per pack" &&
-                                        <FormField
-                                            control={form.control}
-                                            name="packCount"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Pack Count</FormLabel>
-                                                    <FormControl>
-                                                        <Input type="number" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    }
-                                    {
-                                        (priceUnit === "per pack" || priceUnit === "each") &&
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <FormField
-                                                control={form.control}
-                                                name="totalWeightOrVolume"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Total Weight or Volume</FormLabel>
-                                                        <FormControl>
-                                                            <Input type="number" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="totalWeightOrVolumeUnit"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Unit</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Select a unit" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="kg">kg</SelectItem>
-                                                                <SelectItem value="lb">lb</SelectItem>
-                                                                <SelectItem value="g">g</SelectItem>
-                                                                <SelectItem value="oz">oz</SelectItem>
-                                                                <SelectItem value="mL">mL</SelectItem>
-                                                                <SelectItem value="L">L</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                    }
-
-                                    <FormField
-                                        control={form.control}
-                                        name="discountReason"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Discount Reason</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="eg. Weekend Discount" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <div className="space-y-2">
-                                        <FormLabel>Aliases</FormLabel>
-                                        <div className="space-y-2">
-                                            {fieldArray.fields.map((field, index) => (
-                                                <div key={field.id} className="flex gap-2">
-                                                    <FormField
-                                                        control={form.control}
-                                                        name={`aliases.${index}`}
-                                                        render={({ field }) => (
-                                                            <FormItem className="flex-1">
-                                                                <FormControl>
-                                                                    <Input placeholder="Alternative name" {...field} />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <Button
-                                                        type="button"
-                                                        variant="destructive"
-                                                        size="icon"
-                                                        onClick={() => fieldArray.remove(index)}
-                                                    >
-                                                        ×
-                                                    </Button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            className="mt-2"
-                                            onClick={handleAddAlias}
-                                        >
-                                            Add Alias
-                                        </Button>
-                                    </div>
-
-                                    <div className="pb-1"></div>
-                                </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
-
-                        <div className="py-1"></div>
-                        <Button
-                            type="submit"
-                            disabled={addItemMutation.isPending}
-                        >
-                            {addItemMutation.isPending ? "Adding..." : "Submit"}
-                        </Button>
+                        <div className="pt-2">
+                            <Button
+                                type="submit"
+                                disabled={addItemMutation.isPending}
+                                className="w-full md:w-auto"
+                            >
+                                {addItemMutation.isPending ? "Submitting..." : "Submit"}
+                            </Button>
+                        </div>
                     </form>
                 </Form>
             </CardContent>
