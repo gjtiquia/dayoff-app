@@ -4,10 +4,10 @@ import { ThemeToggle } from './theme-toggle'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-    { to: '/', icon: Home, label: 'Home' },
-    { to: '/search', icon: Search, label: 'Search' },
+    // { to: '/', icon: Home, label: 'Home' },
+    // { to: '/search', icon: Search, label: 'Search' },
     { to: '/add', icon: Plus, label: 'Add' },
-    { to: '/notifications', icon: Bell, label: 'Notifications' },
+    // { to: '/notifications', icon: Bell, label: 'Notifications' },
     { to: '/account', icon: User, label: 'Account' },
 ] as const
 
@@ -56,7 +56,8 @@ export function Nav() {
             {/* Mobile Navigation */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 transition-colors duration-300">
                 <div className="bg-gradient-to-t from-background/95 to-background/60 backdrop-blur-md border-t shadow-lg">
-                    <div className="grid grid-cols-5 items-center max-w-md mx-auto">
+                    {/* <div className="grid grid-cols-5 items-center max-w-md mx-auto"> */}
+                    <div className="flex justify-around max-w-md mx-auto">
                         {navItems.map(({ to, icon: Icon, label }) => (
                             <Link
                                 key={to}
