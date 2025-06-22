@@ -40,34 +40,48 @@ export function AccountPage({ session }: AccountPageProps) {
 
     // Weekly schedule data
     const weeklySchedule = [
-        { day: 'Mon', hours: '11:00-18:00' },
-        { day: 'Tue', hours: '(off)' },
-        { day: 'Wed', hours: '10:00-18:00' },
-        { day: 'Thu', hours: '10:00-18:00' },
-        { day: 'Fri', hours: '09:00-18:00' },
-        { day: 'Sat', hours: '09:00-16:30' },
-        { day: 'Sun', hours: '(off)' }
+        { day: 'Mon', hourBlocks: [{ start: { hr: 11, min: 0 }, end: { hr: 18, min: 0 } }] },
+        { day: 'Wed', hourBlocks: [{ start: { hr: 10, min: 0 }, end: { hr: 18, min: 0 } }] },
+        { day: 'Thu', hourBlocks: [{ start: { hr: 10, min: 0 }, end: { hr: 18, min: 0 } }] },
+        { day: 'Fri', hourBlocks: [{ start: { hr: 9, min: 0 }, end: { hr: 18, min: 0 } }] },
+        { day: 'Sat', hourBlocks: [{ start: { hr: 9, min: 0 }, end: { hr: 16, min: 30 } }] }
     ]
+
+    const allDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
     // Calculate total hours
     const calculateTotalHours = () => {
         return weeklySchedule.reduce((total, schedule) => {
-            if (schedule.hours === '(off)') return total
+            const dayTotal = schedule.hourBlocks.reduce((daySum, block) => {
+                const startTotalMinutes = block.start.hr * 60 + block.start.min
+                const endTotalMinutes = block.end.hr * 60 + block.end.min
+                const durationMinutes = endTotalMinutes - startTotalMinutes
 
-            // Parse 24-hour format like "09:00-18:00" or "09:00-16:30"
-            const [startTime, endTime] = schedule.hours.split('-')
-            const [startHour, startMin] = startTime.split(':').map(Number)
-            const [endHour, endMin] = endTime.split(':').map(Number)
+                return daySum + (durationMinutes / 60)
+            }, 0)
 
-            const startTotalMinutes = startHour * 60 + startMin
-            const endTotalMinutes = endHour * 60 + endMin
-            const durationMinutes = endTotalMinutes - startTotalMinutes
-
-            return total + (durationMinutes / 60)
+            return total + dayTotal
         }, 0)
     }
 
     const totalHours = calculateTotalHours()
+
+    // Helper function to format time
+    const formatTime = (time: { hr: number, min: number }) => {
+        const hours = time.hr.toString().padStart(2, '0')
+        const minutes = time.min.toString().padStart(2, '0')
+        return `${hours}:${minutes}`
+    }
+
+    // Helper function to get schedule for a day
+    const getScheduleForDay = (day: string) => {
+        const daySchedule = weeklySchedule.find(s => s.day === day)
+        if (!daySchedule) return '(Day Off)'
+
+        return daySchedule.hourBlocks
+            .map(block => `${formatTime(block.start)}-${formatTime(block.end)}`)
+            .join(', ')
+    }
 
     return (
         <div className='space-y-6'>
@@ -79,14 +93,17 @@ export function AccountPage({ session }: AccountPageProps) {
             <div className='space-y-3'>
                 <h3 className='text-lg font-medium'>Weekly Schedule</h3>
                 <div className='space-y-2'>
-                    {weeklySchedule.map((schedule) => (
-                        <div key={schedule.day} className='flex justify-between items-center py-1'>
-                            <span className='font-medium'>{schedule.day}:</span>
-                            <span className={`${schedule.hours === '(off)' ? 'text-muted-foreground italic' : 'text-foreground'}`}>
-                                {schedule.hours}
-                            </span>
-                        </div>
-                    ))}
+                    {allDays.map((day) => {
+                        const hours = getScheduleForDay(day)
+                        return (
+                            <div key={day} className='flex justify-between items-center py-1'>
+                                <span className='font-medium'>{day}:</span>
+                                <span className={`${hours === '(Day Off)' ? 'text-muted-foreground italic' : 'text-foreground'}`}>
+                                    {hours}
+                                </span>
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
 
