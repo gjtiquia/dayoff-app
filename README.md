@@ -24,6 +24,9 @@ pnpm install
 # open a new terminal tab/window with /backend as the root
 cd backend
 
+# setup postgres schema if have not already done so
+pnpm run db:push
+
 # start dev server at port 3000
 pnpm run dev
 ```
