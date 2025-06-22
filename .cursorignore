@@ -1,0 +1,13 @@
+# Cursor settings for query key conventions
+rule "use-query-keys-constant" {
+    # Enforce using QUERY_KEYS constant instead of inline arrays
+    pattern = 'queryKey: \[[^\]]+\]'
+    message = "Use QUERY_KEYS constant from '@/lib/query-keys' instead of inline query key arrays"
+    severity = "warning"
+}
+
+# Ignore patterns
+node_modules/
+dist/
+build/
+.next/ 

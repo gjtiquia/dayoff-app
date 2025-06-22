@@ -1,0 +1,26 @@
+{
+    "files": [],
+    "references": [
+        {
+            "path": "./tsconfig.app.json"
+        },
+        {
+            "path": "./tsconfig.node.json"
+        },
+        {
+            // Required to use types from backend and for backend to continue to use absolute paths defined by backend's tsconfig.json
+            "path": "../backend"
+        }
+    ],
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ],
+            "backend/*": [
+                "../backend/*"
+            ]
+        }
+    },
+}
