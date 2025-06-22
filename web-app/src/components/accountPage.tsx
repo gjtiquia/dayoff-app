@@ -73,6 +73,20 @@ export function AccountPage({ session }: AccountPageProps) {
         return `${hours}:${minutes}`
     }
 
+    // Helper function to calculate hours for a single day
+    const calculateDayHours = (day: string) => {
+        const daySchedule = weeklySchedule.find(s => s.day === day)
+        if (!daySchedule) return 0
+
+        return daySchedule.hourBlocks.reduce((daySum, block) => {
+            const startTotalMinutes = block.start.hr * 60 + block.start.min
+            const endTotalMinutes = block.end.hr * 60 + block.end.min
+            const durationMinutes = endTotalMinutes - startTotalMinutes
+
+            return daySum + (durationMinutes / 60)
+        }, 0)
+    }
+
     // Helper function to get schedule for a day
     const getScheduleForDay = (day: string) => {
         const daySchedule = weeklySchedule.find(s => s.day === day)
@@ -95,12 +109,18 @@ export function AccountPage({ session }: AccountPageProps) {
                 <div className='space-y-2'>
                     {allDays.map((day) => {
                         const hours = getScheduleForDay(day)
+                        const dayHours = calculateDayHours(day)
                         return (
                             <div key={day} className='flex justify-between items-center py-1'>
-                                <span className='font-medium'>{day}:</span>
-                                <span className={`${hours === '(Day Off)' ? 'text-muted-foreground italic' : 'text-foreground'}`}>
-                                    {hours}
-                                </span>
+                                <div className='flex justify-between items-center w-full'>
+                                    <span className='font-medium'>{day}:</span>
+                                    <span className={`flex-1 text-center ${hours === '(Day Off)' ? 'text-muted-foreground italic' : 'text-foreground'}`}>
+                                        {hours}
+                                    </span>
+                                    <span className='text-right min-w-[60px]'>
+                                        {dayHours > 0 ? `${dayHours}h` : '-'}
+                                    </span>
+                                </div>
                             </div>
                         )
                     })}
