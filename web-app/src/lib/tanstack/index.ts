@@ -1,5 +1,6 @@
 import { QueryClient } from "@tanstack/react-query"
 import { AUTH_QUERIES } from "./queries/auth"
+import { SCHEDULE_QUERIES } from "./queries/schedule"
 import { AUTH_MUTATIONS } from "./mutations/auth"
 import { ITEM_MUTATIONS } from "./mutations/item"
 export { QUERY_KEYS } from "./keys"
@@ -14,6 +15,7 @@ export const queryClient = new QueryClient({
 
 export const QUERIES = {
     AUTH: AUTH_QUERIES,
+    SCHEDULE: SCHEDULE_QUERIES,
 } as const
 
 export const MUTATIONS = {
