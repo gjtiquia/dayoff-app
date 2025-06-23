@@ -16,16 +16,14 @@ const app = new Hono()
     // })
     .post("/add", zValidator("json", addItemFormSchema), async (c) => {
 
-        // TODO : refactor this nicely
         const session = await auth.api.getSession({ headers: c.req.raw.headers })
-        if (session === null) {
+        if (session === null)
             return c.json({ error: "Unauthorized" }, 401);
-        }
 
         const json = c.req.valid("json");
 
         console.log(`${c.req.url}`)
-        console.log("user:", session.user.email);
+        console.log("user.id:", session.user.id);
         console.log("json:", json);
 
         // TODO : add to database, together with created_at / modified_at

@@ -21,6 +21,7 @@ export interface WeeklySchedule {
 
 const app = new Hono()
     .get("/schedule", (c) => {
+
         // Mock schedule data - in a real app, this would come from a database
         const scheduleData: WeeklySchedule = {
             schedule: [
